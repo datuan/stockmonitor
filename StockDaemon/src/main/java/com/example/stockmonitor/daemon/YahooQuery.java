@@ -11,25 +11,25 @@ public class YahooQuery{
 	private final String yahoo_api="http://query.yahooapis.com/v1/public/yql?q=";
 	private final String options="&diagnostics=true&env=http://datatables.org/alltables.env&format=json";
 	
-	public static void main(String[] args){
-		try{
-//			String query="select * from yahoo.finance.quotes " +
-//				"where symbol in (\"AMZN\",\"AAPL\",\"GOOG\",\"MSFT\")";
-			String[] symbols=new String[]{"AMZN","AAPL","GOOG","MSFT"};
-			YahooQuery d=new YahooQuery();
-			String str=d.getCurrentPrices(symbols);
-			// System.out.println(str);
-			List<Stock> stocks=JSonParser.parse(str);
-			Iterator<Stock> iter=stocks.iterator();
-			while (iter.hasNext()){
-				Stock stock=iter.next();
-				System.out.println(stock.toString());
-			}
-		}
-		catch(IOException e){
-			e.printStackTrace();
-		}
-	}
+//	public static void main(String[] args){
+//		try{
+////			String query="select * from yahoo.finance.quotes " +
+////				"where symbol in (\"AMZN\",\"AAPL\",\"GOOG\",\"MSFT\")";
+//			String[] symbols=new String[]{"AMZN","AAPL","GOOG","MSFT"};
+//			YahooQuery d=new YahooQuery();
+//			String str=d.getCurrentPrices(symbols);
+//			// System.out.println(str);
+//			List<Stock> stocks=JSonParser.parse(str);
+//			Iterator<Stock> iter=stocks.iterator();
+//			while (iter.hasNext()){
+//				Stock stock=iter.next();
+//				System.out.println(stock.toString());
+//			}
+//		}
+//		catch(IOException e){
+//			e.printStackTrace();
+//		}
+//	}
 	public String getCurrentPrices(String[] symbols) throws IOException{
 		//?q=select * from yahoo.finance.quotes where symbol in ("AMZN","AAPL","GOOG","MSFT")
 		
