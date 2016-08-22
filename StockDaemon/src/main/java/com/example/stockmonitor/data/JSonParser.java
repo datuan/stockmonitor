@@ -1,4 +1,4 @@
-package com.example.stockmonitor;
+package com.example.stockmonitor.data;
 import org.json.*;
 import java.util.*;
 import java.text.SimpleDateFormat;
@@ -18,10 +18,14 @@ public class JSonParser{
 		long epoch=convertUTCtoEpoch(currentUTC);
 		JSONArray results=json.getJSONObject("results").getJSONArray("quote");
 		List<Stock> list=new ArrayList<>();
-		Iterator iter=results.iterator();
+		Iterator<Object> iter=results.iterator();
 		while (iter.hasNext()){
 			JSONObject obj=(JSONObject)iter.next();
 			String name=obj.getString("Name");
+			if (name==null){
+				//incorrect symbol
+				continue;
+			}
 			String symbol=obj.getString("symbol");
 			double ask=obj.getDouble("Ask");
 			double bid=obj.getDouble("Bid");
@@ -32,6 +36,11 @@ public class JSonParser{
 		}
 		return list;
 	}
+	/**
+	 * Convert a string stored as yyyy-HH-ddTHH:mm:ssZ format returned by Yahoo into an epoch time
+	 * @param currentUTC UTC time string
+	 * @return epoch time
+	 */
 	private static long convertUTCtoEpoch(String currentUTC){
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
 		format.setTimeZone(TimeZone.getTimeZone("UTC"));
