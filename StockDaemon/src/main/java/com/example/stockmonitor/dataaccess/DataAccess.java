@@ -16,7 +16,7 @@ public interface DataAccess{
 	 */
 	void addSymbol(String userID, String companyID) throws DataAccessException;
 	/**
-	 * Add a new stock prize
+	 * Add a new stock price
 	 * @param stock struct that contains stock information
 	 * @throws DataAccessException
 	 */
@@ -36,10 +36,23 @@ public interface DataAccess{
 	 */
 	List<Stock> companyHistory(String companyID) throws DataAccessException;
 	/**
-	 * List of all company stock symbols a user followed
+	 * List of all newest/updated prices for the symbols a user followed
 	 * @param userID userID
-	 * @return list of all companies and associated latest stock prices that a user followed
+	 * @return list of all newest stock prices that a user followed
 	 * @throws DataAccessException
 	 */
 	List<Stock> listCompany(String userID) throws DataAccessException;
+	/**
+	 * Get a list of all
+	 * @param userID userID
+	 * @return list of all followed symbols
+	 * @throws DataAccessException
+	 */
+	List<String> followedSymbol(String userID) throws DataAccessException;
+	/**
+	 * Get all stock symbols in the database, used for the daemon process
+	 * @return all stock symbols
+	 * @throws DataAccessException
+	 */
+	List<String> getAllSymbols() throws DataAccessException;
 }

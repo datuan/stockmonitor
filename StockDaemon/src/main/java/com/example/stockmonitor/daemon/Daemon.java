@@ -3,6 +3,7 @@ package com.example.stockmonitor.daemon;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
 import java.util.TimerTask;
 
 import com.example.stockmonitor.data.Stock;
@@ -17,36 +18,39 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class Daemon extends TimerTask {
-
+	private static final Logger logger = LogManager.getLogger("StockDaemon");
+	private static Timer timer;
+	private static int DELAY=10*1000;
+	
+	private static SQLDataPool pool=new DBCPMySQLDataPool();
+	private DataAccess da=new SQLDataAccess(pool);
+	
 	public static void main(String[] args){
-		final Logger logger = LogManager.getLogger("StockDaemon");
-		try{
-			String[] symbols=new String[]{"AMZN","AAPL","GOOG","MSFT"};
-			StockQuery d=new GoogleStockQuery();
-			List<Stock> stocks=d.getStockPrices(symbols);
-			SQLDataPool pool=new DBCPMySQLDataPool();
-			DataAccess da=new SQLDataAccess(pool);
-			Iterator<Stock> iter=stocks.iterator();
-			while (iter.hasNext()){
-				Stock stock=iter.next();
-				try{
-					da.addStockItem(stock);
-					logger.info("Stock: "+stock.toString()+" added to MySQL");
-				}
-				catch (DataAccessException e){
-					logger.error("Error accessing data:"+e.getMessage());
-				}
-				
-			}
-		}
-		catch(IOException e){
-			e.printStackTrace();
-		}
+		timer=new Timer();
+		timer.schedule(new Daemon(), 0, DELAY);
 	}
 
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		
+		try{
+			List<String> symList=da.getAllSymbols();
+			String[] symbols=new String[symList.size()];
+			symbols=symList.toArray(symbols);
+			StockQuery d=new GoogleStockQuery();
+			List<Stock> stocks=d.getStockPrices(symbols);
+			Iterator<Stock> iter=stocks.iterator();
+			while (iter.hasNext()){
+				Stock stock=iter.next();
+				da.addStockItem(stock);
+				logger.error("Stock: "+stock.toString()+" added to MySQL");
+			}
+		}
+		catch(DataAccessException e){
+			logger.error("Error(s) while contacting MySQL server, msg="+e.getMessage());
+		}
+		catch(IOException e){
+			logger.error("Error(s) while updating stock prices, msg="+e.getMessage());
+		}
 	}
 }

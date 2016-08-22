@@ -123,6 +123,21 @@ public class SQLDataAccess implements DataAccess{
 	public List<Stock> listCompany(String userID) throws DataAccessException {
 		// TODO Auto-generated method stub
 		try{
+			List<String> symbolList=followedSymbol(userID);
+			String[] symbols=new String[symbolList.size()];
+			symbolList.toArray(symbols);
+			return sQuery.getStockPrices(symbols);
+			//TODO: check for error
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			throw new DataAccessException("Error(s) while contacting web service for updated prices, msg="+e.getMessage());
+		}
+	}
+	@Override
+	public List<String> followedSymbol(String userID) throws DataAccessException {
+		// TODO Auto-generated method stub
+		try{
 			Connection conn=getConnection();
 			String sql="select symbol from follow where userid=?";
 			PreparedStatement stmt=conn.prepareStatement(sql);
@@ -135,21 +150,31 @@ public class SQLDataAccess implements DataAccess{
 			rs.close();
 			stmt.close();
 			conn.close();
-			//get update stock via Google web service as required in the description
-			String[] symbols=new String[symbolList.size()];
-			symbols=symbolList.toArray(symbols);
-			return sQuery.getStockPrices(symbols);
-			//TODO: check for error
-//			YahooStockQuery stockDaemon=new YahooStockQuery();
-//			String data=stockDaemon.getCurrentPrices(symbols);
-//			return YahooJSonParser.parse(data);
-			
+			return symbolList;
 		}
 		catch (SQLException e){
 			throw new DataAccessException("Error(s) while contacting SQL server, msg="+e.getMessage());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			throw new DataAccessException("Error(s) while contacting web service for updated prices, msg="+e.getMessage());
+		}
+	}
+	@Override
+	public List<String> getAllSymbols() throws DataAccessException {
+		// TODO Auto-generated method stub
+		try{
+			Connection conn=getConnection();
+			String sql="select symbol from stock_symbol";
+			PreparedStatement stmt=conn.prepareStatement(sql);
+			List<String> symbolList=new ArrayList<>();
+			ResultSet rs=stmt.executeQuery();
+			while (rs.next()){
+				symbolList.add(rs.getString(1));
+			}
+			rs.close();
+			stmt.close();
+			conn.close();
+			return symbolList;
+		}
+		catch (SQLException e){
+			throw new DataAccessException("Error(s) while contacting SQL server, msg="+e.getMessage());
 		}
 	}
 
