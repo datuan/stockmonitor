@@ -1,4 +1,4 @@
-package com.example.stockmonitor.daemon;
+package com.example.stockmonitor.query;
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -6,31 +6,17 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.HttpResponse;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.JSONException;
+
 import com.example.stockmonitor.data.*;
-public class YahooQuery{
+import com.example.stockmonitor.query.util.JsonParser;
+import com.example.stockmonitor.query.util.YahooJSonParser;
+public class YahooStockQuery implements StockQuery{
 	private final String yahoo_api="http://query.yahooapis.com/v1/public/yql?q=";
 	private final String options="&diagnostics=true&env=http://datatables.org/alltables.env&format=json";
-	
-//	public static void main(String[] args){
-//		try{
-////			String query="select * from yahoo.finance.quotes " +
-////				"where symbol in (\"AMZN\",\"AAPL\",\"GOOG\",\"MSFT\")";
-//			String[] symbols=new String[]{"AMZN","AAPL","GOOG","MSFT"};
-//			YahooQuery d=new YahooQuery();
-//			String str=d.getCurrentPrices(symbols);
-//			// System.out.println(str);
-//			List<Stock> stocks=JSonParser.parse(str);
-//			Iterator<Stock> iter=stocks.iterator();
-//			while (iter.hasNext()){
-//				Stock stock=iter.next();
-//				System.out.println(stock.toString());
-//			}
-//		}
-//		catch(IOException e){
-//			e.printStackTrace();
-//		}
-//	}
-	public String getCurrentPrices(String[] symbols) throws IOException{
+	JsonParser parser=new YahooJSonParser();
+	@Override
+	public List<Stock> getStockPrices(String[] symbols) throws IOException{
 		//?q=select * from yahoo.finance.quotes where symbol in ("AMZN","AAPL","GOOG","MSFT")
 		
 		String query="select * from yahoo.finance.quotes where symbol in (";
@@ -50,6 +36,14 @@ public class YahooQuery{
 			sb.append("\n");
 		}
 		rd.close();
-		return sb.toString();
+		try {
+			List<Stock> stocks= parser.parseString(sb.toString());
+			return stocks;
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+		
 	}
 }

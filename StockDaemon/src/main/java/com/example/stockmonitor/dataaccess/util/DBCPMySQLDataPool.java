@@ -11,9 +11,9 @@ public class DBCPMySQLDataPool implements SQLDataPool{
 	private static BasicDataSource ds=null;
 	//connection information
 	private static final String DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
-	private static final String DB_URL = "jdbc:mysql://10.0.1.14:3306/stock?useSSL=false";
-	private static final String DB_USER = "tuan";
-    private static final String DB_PASSWORD = "password";
+	private static final String DB_URL = "jdbc:mysql://localhost:3306/stock?useSSL=false";
+	private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "tuandao";
     private static final int CONN_POOL_SIZE = 10;
 
 	private static void initDataSource(){

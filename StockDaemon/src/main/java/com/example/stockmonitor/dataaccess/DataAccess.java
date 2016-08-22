@@ -14,7 +14,7 @@ public interface DataAccess{
 	 * @param companyID company's stock symbol
 	 * @throws DataAccessException
 	 */
-	void addCompany(String userID, String companyID) throws DataAccessException;
+	void addSymbol(String userID, String companyID) throws DataAccessException;
 	/**
 	 * Add a new stock prize
 	 * @param stock struct that contains stock information

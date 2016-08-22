@@ -3,35 +3,38 @@ package com.example.stockmonitor.daemon;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimerTask;
 
-import com.example.stockmonitor.data.JSonParser;
 import com.example.stockmonitor.data.Stock;
 import com.example.stockmonitor.dataaccess.DataAccess;
 import com.example.stockmonitor.dataaccess.DataAccessException;
 import com.example.stockmonitor.dataaccess.SQLDataAccess;
 import com.example.stockmonitor.dataaccess.util.DBCPMySQLDataPool;
 import com.example.stockmonitor.dataaccess.util.SQLDataPool;
+import com.example.stockmonitor.query.GoogleStockQuery;
+import com.example.stockmonitor.query.StockQuery;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class Daemon {
+public class Daemon extends TimerTask {
 
 	public static void main(String[] args){
+		final Logger logger = LogManager.getLogger("StockDaemon");
 		try{
 			String[] symbols=new String[]{"AMZN","AAPL","GOOG","MSFT"};
-			YahooQuery d=new YahooQuery();
-			String str=d.getCurrentPrices(symbols);
+			StockQuery d=new GoogleStockQuery();
+			List<Stock> stocks=d.getStockPrices(symbols);
 			SQLDataPool pool=new DBCPMySQLDataPool();
 			DataAccess da=new SQLDataAccess(pool);
-			List<Stock> stocks=JSonParser.parse(str);
 			Iterator<Stock> iter=stocks.iterator();
 			while (iter.hasNext()){
 				Stock stock=iter.next();
-				System.out.println(stock.toString());
 				try{
 					da.addStockItem(stock);
-					System.out.println("Data added");
+					logger.info("Stock: "+stock.toString()+" added to MySQL");
 				}
 				catch (DataAccessException e){
-					System.out.println("Error accessing data:"+e.getMessage());
+					logger.error("Error accessing data:"+e.getMessage());
 				}
 				
 			}
@@ -41,4 +44,9 @@ public class Daemon {
 		}
 	}
 
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
+	}
 }

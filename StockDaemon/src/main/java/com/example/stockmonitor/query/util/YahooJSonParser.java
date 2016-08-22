@@ -1,18 +1,21 @@
-package com.example.stockmonitor.data;
+package com.example.stockmonitor.query.util;
 import org.json.*;
+
+import com.example.stockmonitor.data.Stock;
+
 import java.util.*;
 import java.text.SimpleDateFormat;
 /**
   * @author: Tuan Dao
   * This class is used to parse a json string into a list of Stock objects using the org.json library
   */
-public class JSonParser{
+public class YahooJSonParser implements JsonParser{
 	/**
 	  * Parse a json string into list of Stock objects
 	  * @param input json string
 	  * @return a list of Stock objects
 	  */
-	public static List<Stock> parse(String input){
+	public List<Stock> parseString(String input) throws JSONException{
 		JSONObject json=new JSONObject(input).getJSONObject("query");
 		String currentUTC=json.getString("created");
 		long epoch=convertUTCtoEpoch(currentUTC);
@@ -27,30 +30,14 @@ public class JSonParser{
 				continue;
 			}
 			String symbol=obj.getString("symbol");
-			double ask=obj.getDouble("Ask");
-			double bid=obj.getDouble("Bid");
+//			double ask=obj.getDouble("Ask");
+//			double bid=obj.getDouble("Bid");
 			double lastTradePrice=obj.getDouble("LastTradePriceOnly");
 			String lastTradeTime=obj.getString("LastTradeTime");
-			Stock stock=new Stock(name,symbol, lastTradePrice, ask, bid, lastTradeTime,epoch);
+			Stock stock=new Stock(symbol, lastTradePrice, lastTradeTime, epoch);
 			list.add(stock);
 		}
 		return list;
 	}
-	/**
-	 * Convert a string stored as yyyy-HH-ddTHH:mm:ssZ format returned by Yahoo into an epoch time
-	 * @param currentUTC UTC time string
-	 * @return epoch time
-	 */
-	private static long convertUTCtoEpoch(String currentUTC){
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
-		format.setTimeZone(TimeZone.getTimeZone("UTC"));
-		try{
-			Date date = format.parse(currentUTC);
-			return date.getTime();
-		}
-		catch (Exception e){
-			e.printStackTrace();
-			return -1;
-		}
-	}
+	
 }

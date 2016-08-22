@@ -8,10 +8,10 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.*;
 
-import com.example.stockmonitor.daemon.YahooQuery;
-import com.example.stockmonitor.data.JSonParser;
 import com.example.stockmonitor.data.Stock;
 import com.example.stockmonitor.dataaccess.util.SQLDataPool;
+import com.example.stockmonitor.query.GoogleStockQuery;
+import com.example.stockmonitor.query.StockQuery;
 /**
  * Utility class to access data stored in a SQL server, implements the {@link DataAccess} interface
  * @author tuandao
@@ -20,6 +20,9 @@ import com.example.stockmonitor.dataaccess.util.SQLDataPool;
 public class SQLDataAccess implements DataAccess{
 	private SQLDataPool pool=null;
 	private DataSource dataSource;
+	
+	StockQuery sQuery=new GoogleStockQuery();
+	
 	public SQLDataAccess(SQLDataPool pool){
 		this.pool=pool;
 	}
@@ -29,16 +32,16 @@ public class SQLDataAccess implements DataAccess{
 		return dataSource.getConnection();
 	}
 	@Override
-	public void addCompany(String userID, String companyID) throws DataAccessException {
+	public void addSymbol(String userID, String companyID) throws DataAccessException {
 		// TODO Auto-generated method stub
 		try{
 			Connection conn=getConnection();
-			String sql="insert ignore into company(id) values(?)";
+			String sql="insert ignore into stock_symbol(symbol) values(?)";
 			PreparedStatement stmt=conn.prepareStatement(sql);
 			stmt.setString(1, companyID);
 			stmt.executeUpdate();
 			stmt.close();
-			sql="insert into follow(user_id,stock_symbol) values(?,?)";
+			sql="insert into follow(userid,symbol) values(?,?)";
 			stmt=conn.prepareStatement(sql);
 			stmt.setString(1, userID);
 			stmt.setString(2, companyID);
@@ -56,14 +59,12 @@ public class SQLDataAccess implements DataAccess{
 		// TODO Auto-generated method stub
 		try{
 			Connection conn=getConnection();
-			String sql="insert into stocks (stock_symbol, last_query, price, ask, bid, lastTrade) values (?,?,?,?,?,?)";
+			String sql="insert into stocks (symbol, last_query, price, lastTrade) values (?,?,?,?)";
 			PreparedStatement stmt=conn.prepareStatement(sql);
 			stmt.setString(1, stock.symbol);
 			stmt.setLong(2, stock.queryTime);
 			stmt.setDouble(3, stock.lastTradePrice);
-			stmt.setDouble(4, stock.ask);
-			stmt.setDouble(5, stock.bid);
-			stmt.setString(6, stock.lastTradeTime);
+			stmt.setString(4, stock.lastTradeTime);
 			stmt.executeUpdate();
 			stmt.close();
 			conn.close();
@@ -78,7 +79,7 @@ public class SQLDataAccess implements DataAccess{
 		// TODO Auto-generated method stub
 		try{
 			Connection conn=getConnection();
-			String sql="delete from follow where user_id=? and stock_symbol=?";
+			String sql="delete from follow where userid=? and symbol=?";
 			PreparedStatement stmt=conn.prepareStatement(sql);
 			stmt.setString(1, userID);
 			stmt.setString(2, companyID);
@@ -92,22 +93,21 @@ public class SQLDataAccess implements DataAccess{
 	}
 
 	@Override
-	public List<Stock> companyHistory(String companyID) throws DataAccessException {
+	public List<Stock> companyHistory(String symbol) throws DataAccessException {
 		// TODO Auto-generated method stub
 		try{
 			Connection conn=getConnection();
-			String sql="select (last_query, price, ask, bid, lastTrade) from stocks where stock_symbol=? order by last_query desc";
+			String sql="select last_query, price, lastTrade from stocks where symbol=? order by last_query desc";
 			PreparedStatement stmt=conn.prepareStatement(sql);
-			stmt.setString(1, companyID);
+			stmt.setString(1, symbol);
 			ResultSet rs=stmt.executeQuery();
 			List<Stock> stocks=new ArrayList<>();
 			while (rs.next()){
 				Stock stock=new Stock();
+				stock.symbol=symbol;
 				stock.queryTime=rs.getLong(1);
 				stock.lastTradePrice=rs.getDouble(2);
-				stock.ask=rs.getDouble(3);
-				stock.bid=rs.getDouble(4);
-				stock.lastTradeTime=rs.getString(5);
+				stock.lastTradeTime=rs.getString(3);
 				stocks.add(stock);
 			}
 			stmt.close();
@@ -124,7 +124,7 @@ public class SQLDataAccess implements DataAccess{
 		// TODO Auto-generated method stub
 		try{
 			Connection conn=getConnection();
-			String sql="select stock_symbol from follow where user_id=?";
+			String sql="select symbol from follow where userid=?";
 			PreparedStatement stmt=conn.prepareStatement(sql);
 			stmt.setString(1, userID);
 			List<String> symbolList=new ArrayList<>();
@@ -135,12 +135,15 @@ public class SQLDataAccess implements DataAccess{
 			rs.close();
 			stmt.close();
 			conn.close();
-			//get update stock via Yahoo web service as required in the description
+			//get update stock via Google web service as required in the description
 			String[] symbols=new String[symbolList.size()];
 			symbols=symbolList.toArray(symbols);
-			YahooQuery stockDaemon=new YahooQuery();
-			String data=stockDaemon.getCurrentPrices(symbols);
-			return JSonParser.parse(data);
+			return sQuery.getStockPrices(symbols);
+			//TODO: check for error
+//			YahooStockQuery stockDaemon=new YahooStockQuery();
+//			String data=stockDaemon.getCurrentPrices(symbols);
+//			return YahooJSonParser.parse(data);
+			
 		}
 		catch (SQLException e){
 			throw new DataAccessException("Error(s) while contacting SQL server, msg="+e.getMessage());
