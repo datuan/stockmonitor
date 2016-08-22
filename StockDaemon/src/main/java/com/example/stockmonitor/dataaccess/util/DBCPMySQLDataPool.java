@@ -1,8 +1,13 @@
-package com.example.stockmonitor.dataaccess;
+package com.example.stockmonitor.dataaccess.util;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.*;
-public class MySQLDataPool {
+/**
+ * Utility class that leverages Apache DPCP2 for connection pooling
+ * @author tuandao
+ *
+ */
+public class DBCPMySQLDataPool implements SQLDataPool{
 	private static BasicDataSource ds=null;
 	//connection information
 	private static final String DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
@@ -19,8 +24,9 @@ public class MySQLDataPool {
 		ds.setPassword(DB_PASSWORD);
 		ds.setInitialSize(CONN_POOL_SIZE);
 	}
-	public static DataSource getDataSource(){
-		synchronized(MySQLDataPool.class){
+	@Override
+	public DataSource getDataSource(){
+		synchronized(DBCPMySQLDataPool.class){
 			if (ds==null){
 				initDataSource();
 			}

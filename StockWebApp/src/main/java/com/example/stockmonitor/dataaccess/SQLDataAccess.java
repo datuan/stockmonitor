@@ -11,15 +11,21 @@ import java.sql.*;
 import com.example.stockmonitor.daemon.YahooQuery;
 import com.example.stockmonitor.data.JSonParser;
 import com.example.stockmonitor.data.Stock;
+import com.example.stockmonitor.dataaccess.util.SQLDataPool;
 /**
  * Utility class to access data stored in a SQL server, implements the {@link DataAccess} interface
  * @author tuandao
  *
  */
 public class SQLDataAccess implements DataAccess{
-	DataSource dataSource;
+	private SQLDataPool pool=null;
+	private DataSource dataSource;
+	public SQLDataAccess(SQLDataPool pool){
+		this.pool=pool;
+	}
 	Connection getConnection() throws SQLException{
-		dataSource=MySQLDataPool.getDataSource();
+//		SQLDataPool dataPool=new TomcatMySQLDataPool();
+		dataSource=pool.getDataSource();
 		return dataSource.getConnection();
 	}
 	@Override
@@ -27,8 +33,13 @@ public class SQLDataAccess implements DataAccess{
 		// TODO Auto-generated method stub
 		try{
 			Connection conn=getConnection();
-			String sql="insert into follow(user_id,stock_symbol) values(?,?)";
+			String sql="insert ignore into company(id) values(?)";
 			PreparedStatement stmt=conn.prepareStatement(sql);
+			stmt.setString(1, companyID);
+			stmt.executeUpdate();
+			stmt.close();
+			sql="insert into follow(user_id,stock_symbol) values(?,?)";
+			stmt=conn.prepareStatement(sql);
 			stmt.setString(1, userID);
 			stmt.setString(2, companyID);
 			stmt.executeUpdate();

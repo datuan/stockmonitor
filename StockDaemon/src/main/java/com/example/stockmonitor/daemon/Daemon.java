@@ -9,6 +9,8 @@ import com.example.stockmonitor.data.Stock;
 import com.example.stockmonitor.dataaccess.DataAccess;
 import com.example.stockmonitor.dataaccess.DataAccessException;
 import com.example.stockmonitor.dataaccess.SQLDataAccess;
+import com.example.stockmonitor.dataaccess.util.DBCPMySQLDataPool;
+import com.example.stockmonitor.dataaccess.util.SQLDataPool;
 
 public class Daemon {
 
@@ -17,7 +19,8 @@ public class Daemon {
 			String[] symbols=new String[]{"AMZN","AAPL","GOOG","MSFT"};
 			YahooQuery d=new YahooQuery();
 			String str=d.getCurrentPrices(symbols);
-			DataAccess da=new SQLDataAccess();
+			SQLDataPool pool=new DBCPMySQLDataPool();
+			DataAccess da=new SQLDataAccess(pool);
 			List<Stock> stocks=JSonParser.parse(str);
 			Iterator<Stock> iter=stocks.iterator();
 			while (iter.hasNext()){
