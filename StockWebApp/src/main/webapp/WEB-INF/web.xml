@@ -18,9 +18,17 @@
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
+    <servlet>
+    	<servlet-name>process</servlet-name>
+    	<servlet-class>com.example.stockmonitor.servlet.ProcessingServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>Rest With Jersey2</servlet-name>
         <url-pattern>/rest/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>process</servlet-name>
+        <url-pattern>/process</url-pattern>
     </servlet-mapping>
     <resource-ref>
       <description>DB Connection Pool</description>
