@@ -1,19 +1,25 @@
 package com.example.restapi;
+import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import com.example.stockmonitor.data.Stock;
 import com.example.stockmonitor.dataaccess.DataAccess;
 import com.example.stockmonitor.dataaccess.DataAccessException;
 import com.example.stockmonitor.dataaccess.SQLDataAccess;
 import com.example.stockmonitor.dataaccess.util.SQLDataPool;
 import com.example.stockmonitor.dataaccess.util.TomcatMySQLDataPool;
+import com.example.stockmonitor.query.GoogleStockQuery;
+import com.example.stockmonitor.query.StockQuery;
 
 @Path("/stock")
 public class StockApi {
-	static final int SUCCESS = 200;
-	static final int FAIL = 400;
-	
+	@Context HttpServletRequest req;
 	private static SQLDataPool pool=new TomcatMySQLDataPool();
 	
 	/**
@@ -22,15 +28,16 @@ public class StockApi {
 	 */
 	@GET
 	@Produces("application/json")
-	public List<Stock> getAllStockSymbols(){
+	public Response getAllStockSymbols(){
+		String userName=(String) req.getAttribute("username");
 		DataAccess da=new SQLDataAccess(pool);
 		try{
-			List<Stock> stocks=da.listCompany("user1");
-			return stocks;
+			List<Stock> stocks=da.listCompany(userName);
+			return Response.ok(stocks, MediaType.APPLICATION_JSON_TYPE).build();
 		}
 		catch(DataAccessException e){
 			e.printStackTrace();
-			return null;
+			return Response.noContent().entity(e.getMessage()).build();
 		}
 	}
 	/**
@@ -40,50 +47,67 @@ public class StockApi {
 	 */
 	@GET @Path("/{symbol}")
 	@Produces("application/json")
-	public List<Stock> getStockSymbol(@PathParam("symbol") String symbol){
+	public Response getStockSymbol(@PathParam("symbol") String symbol){
 		DataAccess da=new SQLDataAccess(pool);
 		try{
 			List<Stock> stocks=da.companyHistory(symbol);
-			return stocks;
+			return Response.ok(stocks, MediaType.APPLICATION_JSON_TYPE).build();
 		}
 		catch(DataAccessException e){
 			e.printStackTrace();
-			return null;
+			return Response.noContent().entity(e.getMessage()).build();
 		}
 	}
 	/**
 	 * Delete (unfollow) a stock symbol
 	 * @param symbol symbol code, e.g., GOOG for Google
-	 * @return a string value, "200" if success, "400 - {Message}" if errors occurred
+	 * @return OK/ERROR HTTP status
 	 */
 	@DELETE @Path("/{symbol}")
-	public String deleteStockSymbol(@PathParam("symbol") String symbol){
+	public Response deleteStockSymbol(@PathParam("symbol") String symbol){
 		DataAccess da=new SQLDataAccess(pool);
+		String userName=(String) req.getAttribute("username");
 		try{
-			da.deleteCompany("user1", symbol);
-			return String.valueOf(SUCCESS);
+			da.deleteCompany(userName, symbol);
+			return Response.ok().build();
 		}
 		catch(DataAccessException e){
 			e.printStackTrace();
-			return FAIL+" - Error, msg="+e.getMessage();
+			//send back error message
+			return Response.status(Response.Status.NOT_ACCEPTABLE).entity(e.getMessage()).build();
 		}
 	}
 	/**
 	 * Add (follow) a stock symbol
 	 * @param symbol symbol code, e.g., GOOG for Google
-	 * @return a string value, "200" if success, "400 - {Message}" if errors occurred 
+	 * @return OK/ERROR HTTP status
 	 */
 	@POST @Path("/{symbol}")
-	public String addCompany(@PathParam("symbol") String symbol){
+	public Response addCompany(@PathParam("symbol") String symbol){
 		//TODO: add a new company (symbol) to MySQL
-		DataAccess da=new SQLDataAccess(pool);
+		//Query google to see if this is a valid symbol
+		StockQuery query=new GoogleStockQuery();
+		String[] symbols=new String[]{symbol};
 		try{
-			da.addSymbol("user1", symbol);
-			return String.valueOf(SUCCESS);
+			List<Stock> stocks=query.getStockPrices(symbols);
+			if (stocks.size()<1){
+				return Response.status(Response.Status.NOT_ACCEPTABLE).entity("Stock symbol does not exist").build();
+			}
+		}
+		catch(IOException e){
+			return Response.status(Response.Status.NOT_ACCEPTABLE).entity("Cannot verify stock symbol at this time").build();
+		}
+		
+		DataAccess da=new SQLDataAccess(pool);
+		String userName=(String) req.getAttribute("username");
+		try{
+			da.addSymbol(userName, symbol);
+			return Response.ok().build();
 		}
 		catch(DataAccessException e){
 			e.printStackTrace();
-			return FAIL + " - Error, msg="+e.getMessage();
+			//send back error message
+			return Response.status(Response.Status.NOT_ACCEPTABLE).entity(e.getMessage()).build();
 		}
 	}
 }

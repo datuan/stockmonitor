@@ -3,18 +3,13 @@ import java.io.*;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
+import javax.ws.rs.core.Response;
 
-import com.example.stockmonitor.dataaccess.DataAccess;
-import com.example.stockmonitor.dataaccess.DataAccessException;
-import com.example.stockmonitor.dataaccess.SQLDataAccess;
-import com.example.stockmonitor.dataaccess.util.SQLDataPool;
-import com.example.stockmonitor.dataaccess.util.TomcatMySQLDataPool;
 import com.example.stockmonitor.restclient.RestApiClient;
 
 
+@SuppressWarnings("serial")
 public class ProcessingServlet extends HttpServlet{
-	private SQLDataPool pool=new TomcatMySQLDataPool();
-	private DataAccess da=new SQLDataAccess(pool);
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
@@ -26,24 +21,36 @@ public class ProcessingServlet extends HttpServlet{
 				//can send them to some login page
 				//here, for the sake of simplicity
 				username="user1";
-//				RestApiClient client=new RestApiClient(this.getServletContext());
-//				client.getAllSymbols("user1");
 			}
+			String restApiPath=(String)session.getAttribute("restApiPath");
+			if (restApiPath==null){
+				restApiPath=ServletUtility.getRestPath(req.getRequestURL().toString(), req.getContextPath());
+				session.setAttribute("restApiPath", restApiPath);
+			}
+			RestApiClient client=new RestApiClient(restApiPath, username, "");
 			String symbol=req.getParameter("symbol");
 			if (action.equals("Add")){
-				try{
-					da.addSymbol(username, symbol);
+				boolean result=client.addStock(symbol);
+				if (result==false){
+					session.setAttribute("message", "Unable to add symbol "+symbol+", symbol code might not exist, or already added.");
 				}
-				catch(DataAccessException e){
-					//do something
+				else{
+					session.setAttribute("message","Symbol "+symbol+" added");
 				}
 			}
 			else if (action.equals("Delete")){
-				
+				boolean result=client.delStock(symbol);
+				if (result==false){
+					session.setAttribute("message", "Unable to delete symbol "+symbol);
+				}
+				else{
+					session.setAttribute("message","Symbol "+symbol+" deleted");
+				}
 			}
+//			req.getRequestDispatcher("index.jsp").forward(req, resp);
+			resp.sendRedirect("index.jsp");
+			
 		}
-		PrintWriter out=resp.getWriter();
-		out.println("Hello!");
 	}
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {

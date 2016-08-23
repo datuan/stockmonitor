@@ -49,8 +49,9 @@ public class GoogleStockQuery implements StockQuery {
 			List<Stock> stocks=parser.parseString(sb.substring(start));
 			return stocks;
 		}
-		catch(JSONException e){
+		catch(Exception e){
 			logger.error(e.getMessage());
+			logger.error("str="+sb.toString()+", start="+start);
 			return null;
 		}
 	}
