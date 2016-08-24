@@ -4,7 +4,7 @@
 #sql server <host>:<port>
 dbhost=localhost:3306
 #database name, default=stock
-dbname=stock3
+dbname=stock
 #username to access db
 dbuser=root
 #password

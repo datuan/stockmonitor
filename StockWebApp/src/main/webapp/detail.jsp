@@ -38,6 +38,7 @@
 	}
 	else{
 %>
+<a href="index.jsp">Back to home page ... </a>
 <h3>Information about stock symbol <%=symbol%></h3>
 
 <table>

@@ -55,7 +55,7 @@
 	<env-entry> 
     	<env-entry-name>dbname</env-entry-name>
     	<env-entry-type>java.lang.String</env-entry-type>
-    	<!-- dbname --><env-entry-value>stock3</env-entry-value>
+    	<!-- dbname --><env-entry-value>stock</env-entry-value>
 	</env-entry>
 	<env-entry> 
     	<env-entry-name>dbuser</env-entry-name>
