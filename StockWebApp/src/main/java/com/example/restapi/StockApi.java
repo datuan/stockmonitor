@@ -103,6 +103,7 @@ public class StockApi {
 		try{
 			da.addSymbol(userName, symbol);
 			return Response.ok().build();
+//			return Response.ok("1", MediaType.TEXT_PLAIN).build();
 		}
 		catch(DataAccessException e){
 			e.printStackTrace();
