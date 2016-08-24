@@ -15,6 +15,56 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+
+--
+-- Table structure for table `stock_symbol`
+--
+
+DROP TABLE IF EXISTS `stock_symbol`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `stock_symbol` (
+  `symbol` varchar(10) CHARACTER SET utf8 NOT NULL,
+  `name` varchar(20) CHARACTER SET utf8 DEFAULT NULL,
+  PRIMARY KEY (`symbol`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `stock_symbol`
+--
+
+LOCK TABLES `stock_symbol` WRITE;
+/*!40000 ALTER TABLE `stock_symbol` DISABLE KEYS */;
+INSERT INTO `stock_symbol` VALUES ('AAPL',NULL),('AMZN',NULL),('GOOG',NULL),('GOOGL',NULL),('MSFT',NULL),('NFLX',NULL),('YHOO',NULL);
+/*!40000 ALTER TABLE `stock_symbol` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user`
+--
+
+DROP TABLE IF EXISTS `user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user` (
+  `userid` varchar(20) CHARACTER SET utf8 NOT NULL,
+  `password` varchar(20) CHARACTER SET utf8 DEFAULT NULL,
+  `name` varchar(40) CHARACTER SET utf8 DEFAULT NULL,
+  PRIMARY KEY (`userid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user`
+--
+
+LOCK TABLES `user` WRITE;
+/*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user` VALUES ('user1',NULL,NULL);
+/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+UNLOCK TABLES;
+
 --
 -- Table structure for table `follow`
 --
@@ -42,29 +92,7 @@ INSERT INTO `follow` VALUES ('user1','AMZN'),('user1','GOOG'),('user1','MSFT'),(
 /*!40000 ALTER TABLE `follow` ENABLE KEYS */;
 UNLOCK TABLES;
 
---
--- Table structure for table `stock_symbol`
---
 
-DROP TABLE IF EXISTS `stock_symbol`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `stock_symbol` (
-  `symbol` varchar(10) CHARACTER SET utf8 NOT NULL,
-  `name` varchar(20) CHARACTER SET utf8 DEFAULT NULL,
-  PRIMARY KEY (`symbol`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `stock_symbol`
---
-
-LOCK TABLES `stock_symbol` WRITE;
-/*!40000 ALTER TABLE `stock_symbol` DISABLE KEYS */;
-INSERT INTO `stock_symbol` VALUES ('AAPL',NULL),('AMZN',NULL),('GOOG',NULL),('GOOGL',NULL),('MSFT',NULL),('NFLX',NULL),('YHOO',NULL);
-/*!40000 ALTER TABLE `stock_symbol` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `stocks`
@@ -93,30 +121,6 @@ INSERT INTO `stocks` VALUES ('AAPL',1471904207794,108.51,'2016-08-22T16:00:02Z')
 /*!40000 ALTER TABLE `stocks` ENABLE KEYS */;
 UNLOCK TABLES;
 
---
--- Table structure for table `user`
---
-
-DROP TABLE IF EXISTS `user`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `user` (
-  `userid` varchar(20) CHARACTER SET utf8 NOT NULL,
-  `password` varchar(20) CHARACTER SET utf8 DEFAULT NULL,
-  `name` varchar(40) CHARACTER SET utf8 DEFAULT NULL,
-  PRIMARY KEY (`userid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user`
---
-
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES ('user1',NULL,NULL);
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
