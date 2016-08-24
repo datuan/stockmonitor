@@ -84,8 +84,8 @@ cp StockWebApp/target/StockWebApp.war $tomcatPath
 wd=$(pwd)
 test_conf=$wd/daemon.conf
 echo "config file=$test_conf"
-echo "Sleep for 10 seconds, waiting for web app to be deployed"
-sleep 10
+echo "Sleep for 15 seconds, waiting for web app to be deployed"
+sleep 15
 echo "Running test ... "
 #wd=$(pwd)
 #test_conf=$wd/daemon.conf
