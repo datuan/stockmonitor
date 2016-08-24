@@ -40,9 +40,7 @@ public class AuthFilter implements ContainerRequestFilter{
  
         String userName=loginAndPass[0];
         String password=loginAndPass[1];
- 
         sr.setAttribute("username", userName);
-        
         return;
 	}
 

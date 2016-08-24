@@ -4,15 +4,17 @@
 #sql server <host>:<port>
 dbhost=localhost:3306
 #database name, default=stock
-dbname=stock
+dbname=stock3
 #username to access db
 dbuser=root
 #password
 dbpass=tuandao
 #path to tomcat webapp folder
 tomcatPath=/Users/tuandao/tomcat/apache-tomcat-8.0.36/webapps
+#path to web server, for JUnit test the rest api, by default http://localhost:8080/StockWebApp/
+weburl=http://localhost:8080/StockWebApp/
 
-#define variables
+#define file locations
 webconfig=StockWebApp/src/main/webapp/WEB-INF/web.xml
 
 if [ ! -f $webconfig ]; then
@@ -34,8 +36,8 @@ if [ ! -f $dconf ]; then
 fi
 echo "Change values in daemon.conf file"
 sed -i -e "s,dbhost=.*,dbhost="$dbhost",g" $dconf
-sed -i -e "s,dbname=.*,dbhost="$dbname",g" $dconf
-sed -i -e "s,dbuser=.*,dbhost="$dbuser",g" $dconf
+sed -i -e "s,dbname=.*,dbname="$dbname",g" $dconf
+sed -i -e "s,dbuser=.*,dbuser="$dbuser",g" $dconf
 sed -i -e "s,dbpassword=.*,dbpassword="$dbpass",g" $dconf
 
 
@@ -79,8 +81,17 @@ if [ ! -d $tomcatPath ];then
 fi
 cp StockWebApp/target/StockWebApp.war $tomcatPath
 
-echo "Sleep for 20 seconds, waiting for web app to be deployed"
-sleep 20
+wd=$(pwd)
+test_conf=$wd/daemon.conf
+echo "config file=$test_conf"
+echo "Sleep for 10 seconds, waiting for web app to be deployed"
+sleep 10
 echo "Running test ... "
-mvn test -f StockDaemon/pom.xml
+#wd=$(pwd)
+#test_conf=$wd/daemon.conf
+if [ ! -f $test_conf ];then
+	echo "Cannot find $test_conf file for running the test. Exit"
+	exit 1
+fi
+mvn test -f StockDaemon/pom.xml -DconfigFile=$test_conf
 echo "Please open browser to test the GUI interface"

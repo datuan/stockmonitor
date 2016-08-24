@@ -16,10 +16,20 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 
 import com.example.stockmonitor.data.Stock;
-
+/**
+ * Client class to connect to the Stock Rest API
+ * @author tuandao
+ *
+ */
 public class RestApiClient {
 	Client client=null;
 	String restPath, userName, password;
+	/**
+	 * 
+	 * @param restPath absolute url to the rest api
+	 * @param userName username for basic http authentication
+	 * @param password password for basic http authentication
+	 */
 	public RestApiClient(String restPath,String userName, String password) {
 		// TODO Auto-generated constructor stub
 		this.restPath=restPath;
@@ -45,9 +55,11 @@ public class RestApiClient {
 		WebTarget target=client.target(restPath).path("/stock/");
 		Response res=target.request(MediaType.APPLICATION_JSON).get();
 		if (res.getStatusInfo().getFamily()!=Family.SUCCESSFUL){
-			return null;//something wrong happens
+			//something wrong, it might be no connections to SQL server
+			return null;
 		}
-		return res.readEntity(new GenericType<List<Stock>>(){});
+		List<Stock> stocks = res.readEntity(new GenericType<List<Stock>>(){});
+		return stocks;
 	}
 	/**
 	 * Get stock prices of a specific symbols
@@ -59,15 +71,16 @@ public class RestApiClient {
 		WebTarget target=client.target(restPath).path("/stock/"+symbol);
 		Response res=target.request(MediaType.APPLICATION_JSON).get();
 		if (res.getStatusInfo().getFamily()!=Family.SUCCESSFUL){
-			return null;//something wrong happens
+			//something wrong, it might be no connections to SQL server
+			return null;
 		}
 		return res.readEntity(new GenericType<List<Stock>>(){});
 	}
 	/**
-	 * 
+	 * Add/follow a stock symbol
 	 * @param userID
 	 * @param symbol
-	 * @return
+	 * @return true if successful, otherwise false
 	 */
 	public boolean addStock(String symbol){
 		prepareClient();
@@ -78,7 +91,11 @@ public class RestApiClient {
 		}
 		return true;
 	}
-	
+	/**
+	 * Delete/unfollow a stock symbol
+	 * @param symbol
+	 * @return true if successful, otherwise false
+	 */
 	public boolean delStock(String symbol){
 		prepareClient();
 		WebTarget target=client.target(restPath).path("/stock/"+symbol);

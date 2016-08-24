@@ -1,5 +1,6 @@
 package com.example.restapi;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,6 +31,10 @@ public class StockApi {
 	@Produces("application/json")
 	public Response getAllStockSymbols(){
 		String userName=(String) req.getAttribute("username");
+		if (userName.equals("junit")){
+			//this is a junit test
+			return RestAPIMockTest.getAllStock();
+		}
 		DataAccess da=new SQLDataAccess(pool);
 		try{
 			List<Stock> stocks=da.listCompany(userName);
@@ -48,6 +53,12 @@ public class StockApi {
 	@GET @Path("/{symbol}")
 	@Produces("application/json")
 	public Response getStockSymbol(@PathParam("symbol") String symbol){
+		String userName=(String) req.getAttribute("username");
+		if (userName.equals("junit")){
+			//this is a junit test
+			return RestAPIMockTest.getStockSymbol(symbol);
+		}
+		
 		DataAccess da=new SQLDataAccess(pool);
 		try{
 			List<Stock> stocks=da.companyHistory(symbol);
@@ -65,11 +76,21 @@ public class StockApi {
 	 */
 	@DELETE @Path("/{symbol}")
 	public Response deleteStockSymbol(@PathParam("symbol") String symbol){
-		DataAccess da=new SQLDataAccess(pool);
+		
 		String userName=(String) req.getAttribute("username");
+		if (userName.equals("junit")){
+			//this is a junit test
+			return RestAPIMockTest.delCompany(symbol);
+		}
+		
+		DataAccess da=new SQLDataAccess(pool);
 		try{
-			da.deleteCompany(userName, symbol);
-			return Response.ok().build();
+			int count=da.deleteCompany(userName, symbol);
+			//let the client know the result
+			//0: the item of interest might not be in the database
+			//1: the item was in the database and gets deleted
+			//how to deal with the information is left to the client
+			return Response.ok(String.valueOf(count),MediaType.TEXT_PLAIN).build();
 		}
 		catch(DataAccessException e){
 			e.printStackTrace();
@@ -85,6 +106,13 @@ public class StockApi {
 	@POST @Path("/{symbol}")
 	public Response addCompany(@PathParam("symbol") String symbol){
 		//TODO: add a new company (symbol) to MySQL
+		
+		String userName=(String) req.getAttribute("username");
+		if (userName.equals("junit")){
+			//this is a junit test
+			return RestAPIMockTest.addCompany(symbol);
+		}
+		
 		//Query google to see if this is a valid symbol
 		StockQuery query=new GoogleStockQuery();
 		String[] symbols=new String[]{symbol};
@@ -99,16 +127,40 @@ public class StockApi {
 		}
 		
 		DataAccess da=new SQLDataAccess(pool);
-		String userName=(String) req.getAttribute("username");
 		try{
-			da.addSymbol(userName, symbol);
-			return Response.ok().build();
-//			return Response.ok("1", MediaType.TEXT_PLAIN).build();
+			int count=da.addSymbol(userName, symbol);
+			return Response.ok(String.valueOf(count),MediaType.TEXT_PLAIN).build();
 		}
 		catch(DataAccessException e){
 			e.printStackTrace();
 			//send back error message
 			return Response.status(Response.Status.NOT_ACCEPTABLE).entity(e.getMessage()).build();
+		}
+	}
+	/**
+	 * Small utility class for mock testing the rest api
+	 * Will be called if the username is 'junit'
+	 * @author tuandao
+	 *
+	 */
+	static class RestAPIMockTest{
+		static Response addCompany(String symbol){
+			return Response.ok("ADD_SUCCESS", MediaType.TEXT_PLAIN).build();
+		}
+		static Response delCompany(String symbol){
+			return Response.ok("DEL_SUCCESS", MediaType.TEXT_PLAIN).build();
+		}
+		static Response getStockSymbol(String symbol){
+			Stock s=new Stock(symbol, 0.0, "tradetime", 0);
+			List<Stock> stocks=new ArrayList<>();
+			stocks.add(s);
+			return Response.ok(stocks, MediaType.APPLICATION_JSON_TYPE).build();
+		}
+		static Response getAllStock(){
+			Stock s=new Stock("junit", 0.0, "tradetime", 0);
+			List<Stock> stocks=new ArrayList<>();
+			stocks.add(s);
+			return Response.ok(stocks, MediaType.APPLICATION_JSON_TYPE).build();
 		}
 	}
 }

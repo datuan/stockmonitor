@@ -24,8 +24,7 @@ public class DateUtil {
 	}
 	public static String UTCToSimpleFormat(String utcTime){
 		SimpleDateFormat utcFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
-		SimpleDateFormat simpleFormat=new SimpleDateFormat("MM dd, yyyy hh:mm:ss",Locale.US);
-		utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		SimpleDateFormat simpleFormat=new SimpleDateFormat("MM dd, yyyy HH:mm:ss",Locale.US);
 		try{
 			return simpleFormat.format(utcFormat.parse(utcTime));
 		}
@@ -34,7 +33,7 @@ public class DateUtil {
 		}
 	}
 	public static String epochToSimpleFormat(long epoch){
-		SimpleDateFormat simpleFormat=new SimpleDateFormat("MM dd, yyyy hh:mm:ss",Locale.US);
+		SimpleDateFormat simpleFormat=new SimpleDateFormat("MM dd, yyyy HH:mm:ss",Locale.US);
 		try{
 			return simpleFormat.format(new Date(epoch));
 		}

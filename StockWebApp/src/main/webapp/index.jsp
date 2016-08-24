@@ -40,25 +40,37 @@ Symbol: <input type="text" id="symbol" name="symbol"/><br/>
 	List<Stock> stocks=client.getAllSymbols(userName);
 %>
 <h2>Stock symbols that you followed:</h2>
+<% 
+	if (stocks==null){
+		out.println("<h3> Errors happend while retrieving data, check connection to MySQL</h3>");	
+	}
+	else{
+		if (stocks.size()==0){
+			out.println("<h3> You do not currently follow any stock item, please use the add button below to follow some.</h3>");
+		}
+		else{
+%>
 <table border="1">
 <tr>
 	<td>Symbol</td>
 	<td>Price</td>
-	<td>Last Trade Time</td>
-	<td>Last Query Time</td>
+	<td>Last Trade Time (UTC)</td>
+	<td>Last Query Time (Local)</td>
+	<td></td>
 	<td></td>
 </tr>
 <%	//print out followed stocks and current prices
-	if (stocks!=null){
-		for (Stock s : stocks){
-			out.println("<tr>");
-			out.println("<td>"+s.symbol+"</td>");
-			out.println("<td>"+s.lastTradePrice+"</td>");
-			out.println("<td>"+s.lastTradeTime+"</td>");
-			out.println("<td>"+s.queryTime+"</td>");
-			out.println("<td><a href=\"detail.jsp?symbol="+s.symbol+"\">Detail...</a></td>");
-			out.println("</tr>"); 
-		} 
+			for (Stock s : stocks){
+				out.println("<tr>");
+				out.println("<td>"+s.symbol+"</td>");
+				out.println("<td>"+s.lastTradePrice+"</td>");
+				out.println("<td>"+DateUtil.UTCToSimpleFormat(s.lastTradeTime)+"</td>");
+				out.println("<td>"+DateUtil.epochToSimpleFormat(s.queryTime)+"</td>");
+				out.println("<td><a href=\"process?symbol="+s.symbol+"&Action=Delete\">Delete...</a></td>");
+				out.println("<td><a href=\"detail.jsp?symbol="+s.symbol+"\">Detail...</a></td>");
+				out.println("</tr>"); 
+			}
+		}
 	}
 %>
 </table>

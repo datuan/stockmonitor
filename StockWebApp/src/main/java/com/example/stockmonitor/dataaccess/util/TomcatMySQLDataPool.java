@@ -6,7 +6,11 @@ import javax.naming.NamingException;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
-
+/**
+ * Provide a connection pool to web application
+ * @author tuandao
+ *
+ */
 public class TomcatMySQLDataPool implements SQLDataPool {
 	private static DataSource ds=null;
 	private static void initDataSource(){
@@ -39,12 +43,12 @@ public class TomcatMySQLDataPool implements SQLDataPool {
 	    p.setTestOnBorrow( true);
 	    p.setValidationQuery( "SELECT 1");
 	    p.setTestOnReturn( false);
-		p.setMaxActive(100);
+		p.setMaxActive(15);
         p.setInitialSize(5);
         p.setMaxWait(10000);
         p.setRemoveAbandonedTimeout(60);
         p.setMinEvictableIdleTimeMillis(30000);
-        p.setMinIdle(10);
+        p.setMinIdle(3);
         p.setLogAbandoned(true);
         p.setRemoveAbandoned(true);
         p.setJdbcInterceptors(
@@ -54,6 +58,7 @@ public class TomcatMySQLDataPool implements SQLDataPool {
         ds = new DataSource();
         ds.setPoolProperties(p);
 	}
+	
 	@Override
 	public javax.sql.DataSource getDataSource() {
 		// TODO Auto-generated method stub

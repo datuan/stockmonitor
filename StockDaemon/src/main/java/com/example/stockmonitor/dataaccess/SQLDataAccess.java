@@ -32,30 +32,31 @@ public class SQLDataAccess implements DataAccess{
 		return dataSource.getConnection();
 	}
 	@Override
-	public void addSymbol(String userID, String companyID) throws DataAccessException {
+	public int addSymbol(String userID, String symbolID) throws DataAccessException {
 		// TODO Auto-generated method stub
 		try{
 			Connection conn=getConnection();
 			String sql="insert ignore into stock_symbol(symbol) values(?)";
 			PreparedStatement stmt=conn.prepareStatement(sql);
-			stmt.setString(1, companyID);
+			stmt.setString(1, symbolID);
 			stmt.executeUpdate();
 			stmt.close();
 			sql="insert into follow(userid,symbol) values(?,?)";
 			stmt=conn.prepareStatement(sql);
 			stmt.setString(1, userID);
-			stmt.setString(2, companyID);
-			stmt.executeUpdate();
+			stmt.setString(2, symbolID);
+			int count=stmt.executeUpdate();
 			stmt.close();
 			conn.close();
+			return count;
 		}
 		catch (SQLException e){
-			throw new DataAccessException("Error(s) while contacting SQL server, msg="+e.getMessage());
+			throw new DataAccessException("Error(s) while contacting SQL server: "+e.getMessage());
 		}
 	}
 
 	@Override
-	public void addStockItem(Stock stock) throws DataAccessException {
+	public int addStockItem(Stock stock) throws DataAccessException {
 		// TODO Auto-generated method stub
 		try{
 			Connection conn=getConnection();
@@ -65,30 +66,56 @@ public class SQLDataAccess implements DataAccess{
 			stmt.setLong(2, stock.queryTime);
 			stmt.setDouble(3, stock.lastTradePrice);
 			stmt.setString(4, stock.lastTradeTime);
-			stmt.executeUpdate();
+			int count=stmt.executeUpdate();
 			stmt.close();
 			conn.close();
+			return count;
 		}
 		catch (SQLException e){
-			throw new DataAccessException("Error(s) while contacting SQL server, msg="+e.getMessage());
+			throw new DataAccessException("Error(s) while contacting SQL server: "+e.getMessage());
 		}
 	}
 
 	@Override
-	public void deleteCompany(String userID, String companyID) throws DataAccessException {
+	public int deleteCompany(String userID, String symbolID) throws DataAccessException {
 		// TODO Auto-generated method stub
 		try{
 			Connection conn=getConnection();
 			String sql="delete from follow where userid=? and symbol=?";
 			PreparedStatement stmt=conn.prepareStatement(sql);
 			stmt.setString(1, userID);
-			stmt.setString(2, companyID);
-			stmt.executeUpdate();
+			stmt.setString(2, symbolID);
+			int count=stmt.executeUpdate();
 			stmt.close();
+			
+			boolean optional=false;
+			//experimental feature
+			if (optional){
+				//if this user is the last user that follows the item
+				//we should delete the item also, so the daemon does not download and store information of the stock item
+				sql="select count(*) from follow where symbol=?";
+				stmt=conn.prepareStatement(sql);
+				stmt.setString(1, symbolID);
+				ResultSet rs=stmt.executeQuery();
+				int numberofFollowers=0;
+				while (rs.next()){
+					numberofFollowers=rs.getInt(1);
+				}
+				rs.close();
+				stmt.close();
+				if (numberofFollowers==0){
+					sql="delete from stock_symbol where symbol=?";
+					stmt=conn.prepareStatement(sql);
+					stmt.setString(1, symbolID);
+					stmt.executeUpdate();
+				}
+			}
+			
 			conn.close();
+			return count;
 		}
 		catch (SQLException e){
-			throw new DataAccessException("Error(s) while contacting SQL server, msg="+e.getMessage());
+			throw new DataAccessException("Error(s) while contacting SQL server: "+e.getMessage());
 		}
 	}
 
@@ -115,7 +142,7 @@ public class SQLDataAccess implements DataAccess{
 			return stocks;
 		}
 		catch (SQLException e){
-			throw new DataAccessException("Error(s) while contacting SQL server, msg="+e.getMessage());
+			throw new DataAccessException("Error(s) while contacting SQL server: "+e.getMessage());
 		}
 	}
 
@@ -125,13 +152,38 @@ public class SQLDataAccess implements DataAccess{
 		try{
 			List<String> symbolList=followedSymbol(userID);
 			String[] symbols=new String[symbolList.size()];
+			if (symbols.length==0){
+				//the user has followed no symbols
+				return new ArrayList<Stock>(); //return an empty list
+			}
 			symbolList.toArray(symbols);
-			return sQuery.getStockPrices(symbols);
-			//TODO: check for error
+			List<Stock> stocks= sQuery.getStockPrices(symbols);
+			//TODO: Since we already query the newest prices, let us save them to the database also
+			
+			//however, I want to do this in another thread, so no delay in showing the results to user
+			Thread t=new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					try{
+						for (Stock s : stocks){
+							addStockItem(s);
+						}
+					}
+					catch(DataAccessException e){
+						//do nothing, is not important if we can not save this piece of updated information
+					}
+					
+				}
+			});
+			t.start();
+			
+			return stocks;
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			throw new DataAccessException("Error(s) while contacting web service for updated prices, msg="+e.getMessage());
+			throw new DataAccessException("Error(s) while contacting web service for updated prices: "+e.getMessage());
 		}
 	}
 	@Override
@@ -153,7 +205,7 @@ public class SQLDataAccess implements DataAccess{
 			return symbolList;
 		}
 		catch (SQLException e){
-			throw new DataAccessException("Error(s) while contacting SQL server, msg="+e.getMessage());
+			throw new DataAccessException("Error(s) while contacting SQL server: "+e.getMessage());
 		}
 	}
 	@Override
@@ -174,7 +226,7 @@ public class SQLDataAccess implements DataAccess{
 			return symbolList;
 		}
 		catch (SQLException e){
-			throw new DataAccessException("Error(s) while contacting SQL server, msg="+e.getMessage());
+			throw new DataAccessException("Error(s) while contacting SQL server: "+e.getMessage());
 		}
 	}
 

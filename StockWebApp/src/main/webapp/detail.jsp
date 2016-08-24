@@ -29,7 +29,7 @@
 		request.getSession().setAttribute("username", userName);
 	}
 	//Date format
-	SimpleDateFormat dateFormat=new SimpleDateFormat("MM dd, yyyy hh:mm:ss");
+	//SimpleDateFormat dateFormat=new SimpleDateFormat("MM dd, yyyy HH:mm:ss");
 	RestApiClient client=new RestApiClient(restApiPath,userName,"");
 	String symbol=request.getParameter("symbol");
 	List<Stock> stocks=client.getSymbolHistory(symbol);
@@ -55,8 +55,8 @@
 			out.println("<tr>");
 			out.println("<td>"+s.symbol+"</td>");
 			out.println("<td>"+s.lastTradePrice+"</td>");
-			out.println("<td>"+s.lastTradeTime+"</td>");
-			out.println("<td>"+dateFormat.format(new Date(s.queryTime))+"</td>");
+			out.println("<td>"+DateUtil.UTCToSimpleFormat(s.lastTradeTime)+"</td>");
+			out.println("<td>"+DateUtil.epochToSimpleFormat(s.queryTime)+"</td>");
 			out.println("</tr>"); 
 		}
 %>
@@ -79,7 +79,8 @@
           //[new Date("07 21, 2011 07:20:00"), 2],
 <%
 		for (Stock s : stocks){
-			out.print("[new Date(\""+dateFormat.format(new Date(s.queryTime))+"\")," +s.lastTradePrice +"],\n"); 
+			//out.print("[new Date(\""+dateFormat.format(new Date(s.queryTime))+"\")," +s.lastTradePrice +"],\n"); 
+			out.print("[new Date(\""+DateUtil.epochToSimpleFormat(s.queryTime)+"\")," +s.lastTradePrice +"],\n");
 		}
 %>
         ]);

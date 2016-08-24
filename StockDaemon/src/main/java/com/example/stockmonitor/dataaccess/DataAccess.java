@@ -12,22 +12,25 @@ public interface DataAccess{
 	 * Add a company to the user's follow list
 	 * @param userID userID
 	 * @param companyID company's stock symbol
+	 * @return number of data entries affected, should be 1
 	 * @throws DataAccessException
 	 */
-	void addSymbol(String userID, String companyID) throws DataAccessException;
+	int addSymbol(String userID, String companyID) throws DataAccessException;
 	/**
 	 * Add a new stock price
 	 * @param stock struct that contains stock information
+	 * @return number of data entries affected, should be 1
 	 * @throws DataAccessException
 	 */
-	void addStockItem(Stock stock) throws DataAccessException;
+	int addStockItem(Stock stock) throws DataAccessException;
 	/**
 	 * Delete a company (stock symbol) from a user's follow list
 	 * @param userID userID
 	 * @param companyID company's stock symbol
+	 * @return number of data entries affected, should be 1
 	 * @throws DataAccessException
 	 */
-	void deleteCompany(String userID, String companyID) throws DataAccessException;
+	int deleteCompany(String userID, String companyID) throws DataAccessException;
 	/**
 	 * Get stock information of a company
 	 * @param companyID company's stock symbol
@@ -36,7 +39,7 @@ public interface DataAccess{
 	 */
 	List<Stock> companyHistory(String companyID) throws DataAccessException;
 	/**
-	 * List of all newest/updated prices for the symbols a user followed
+	 * Lists all newest/updated prices for the symbols a user followed
 	 * @param userID userID
 	 * @return list of all newest stock prices that a user followed
 	 * @throws DataAccessException
