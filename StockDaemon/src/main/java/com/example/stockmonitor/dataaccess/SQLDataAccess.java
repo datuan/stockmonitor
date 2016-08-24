@@ -11,6 +11,7 @@ import java.sql.*;
 import com.example.stockmonitor.data.Stock;
 import com.example.stockmonitor.dataaccess.util.SQLDataPool;
 import com.example.stockmonitor.query.GoogleStockQuery;
+import com.example.stockmonitor.query.MITStockQuery;
 import com.example.stockmonitor.query.StockQuery;
 /**
  * Utility class to access data stored in a SQL server, implements the {@link DataAccess} interface
@@ -157,7 +158,16 @@ public class SQLDataAccess implements DataAccess{
 				return new ArrayList<Stock>(); //return an empty list
 			}
 			symbolList.toArray(symbols);
-			List<Stock> stocks= sQuery.getStockPrices(symbols);
+			List<Stock> tList = null;
+			try{
+				tList=sQuery.getStockPrices(symbols);
+			}
+			catch(Exception e){
+				//if Google fails
+				tList=new MITStockQuery().getStockPrices(symbols);
+			}
+			List<Stock> stocks=tList;//trick: tList is used as a temporary, since stocks need to be final to be used in the thread
+			
 			//TODO: Since we already query the newest prices, let us save them to the database also
 			
 			//however, I want to do this in another thread, so no delay in showing the results to user

@@ -16,6 +16,7 @@ import com.example.stockmonitor.dataaccess.SQLDataAccess;
 import com.example.stockmonitor.dataaccess.util.SQLDataPool;
 import com.example.stockmonitor.dataaccess.util.TomcatMySQLDataPool;
 import com.example.stockmonitor.query.GoogleStockQuery;
+import com.example.stockmonitor.query.MITStockQuery;
 import com.example.stockmonitor.query.StockQuery;
 
 @Path("/stock")
@@ -115,15 +116,32 @@ public class StockApi {
 		
 		//Query google to see if this is a valid symbol
 		StockQuery query=new GoogleStockQuery();
-		String[] symbols=new String[]{symbol};
+		String[] symbols=new String[]{"GOOG",symbol};
 		try{
+			//using Google to check validation
+			//There is a trick here, for some stock, e.g. SSS (a valid one)
+			//Google said it is not valid if it is query alone, however if we ask about the same stock with another one, e.g. GOOG
+			//Google is able to return the correct result -> combine our query with GOOG
 			List<Stock> stocks=query.getStockPrices(symbols);
-			if (stocks.size()<1){
+			if (stocks.size()<2){
 				return Response.status(Response.Status.NOT_ACCEPTABLE).entity("Stock symbol does not exist").build();
 			}
 		}
-		catch(IOException e){
-			return Response.status(Response.Status.NOT_ACCEPTABLE).entity("Cannot verify stock symbol at this time").build();
+		catch(Exception e){
+			try{
+				//TODO: this piece of code is not nice, rewrite if have time, make it into a loop
+				//Google service fails, use MIT as a fail over
+				query=new MITStockQuery();
+				symbols=new String[]{symbol};
+				List<Stock> stocks=query.getStockPrices(symbols);
+				if (stocks.size()<1){
+					return Response.status(Response.Status.NOT_ACCEPTABLE).entity("Stock symbol does not exist").build();
+				}
+			}
+			catch(Exception ex){
+				return Response.status(Response.Status.NOT_ACCEPTABLE).entity("Cannot verify stock symbol at this time. Please try again.").build();
+			}
+			
 		}
 		
 		DataAccess da=new SQLDataAccess(pool);

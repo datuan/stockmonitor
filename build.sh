@@ -95,3 +95,5 @@ if [ ! -f $test_conf ];then
 fi
 mvn test -f StockDaemon/pom.xml -DconfigFile=$test_conf
 echo "Please open browser to test the GUI interface"
+#want to run the daemon process?
+#java -jar StockDaemon/target/stockdaemon-1.0-SNAPSHOT-jar-with-dependencies.jar daemon.conf

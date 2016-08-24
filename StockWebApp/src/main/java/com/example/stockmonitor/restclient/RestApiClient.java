@@ -16,6 +16,7 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 
 import com.example.stockmonitor.data.Stock;
+import com.example.stockmonitor.dataaccess.DataAccessException;
 /**
  * Client class to connect to the Stock Rest API
  * @author tuandao
@@ -77,32 +78,37 @@ public class RestApiClient {
 		return res.readEntity(new GenericType<List<Stock>>(){});
 	}
 	/**
-	 * Add/follow a stock symbol
-	 * @param userID
+	 * Add a stock symbol
 	 * @param symbol
-	 * @return true if successful, otherwise false
+	 * @throws DataAccessException if errors happen
 	 */
-	public boolean addStock(String symbol){
+	public void addStock(String symbol) throws DataAccessException{
 		prepareClient();
 		WebTarget target=client.target(restPath).path("/stock/"+symbol);
 		Response res=target.request(MediaType.TEXT_PLAIN).post(Entity.text(symbol));
 		if (res.getStatusInfo().getFamily()!=Family.SUCCESSFUL){
-			return false;//something wrong happens
+			//get message from server
+			String message=res.readEntity(String.class);
+//			return false;//something wrong happens
+			throw new DataAccessException(message);
 		}
-		return true;
+		return;//success
 	}
-	/**
-	 * Delete/unfollow a stock symbol
-	 * @param symbol
-	 * @return true if successful, otherwise false
-	 */
-	public boolean delStock(String symbol){
+	
+	public void delStock(String symbol) throws DataAccessException{
 		prepareClient();
 		WebTarget target=client.target(restPath).path("/stock/"+symbol);
 		Response res=target.request(MediaType.TEXT_PLAIN).delete();
+		String message=res.readEntity(String.class);
 		if (res.getStatusInfo().getFamily()!=Family.SUCCESSFUL){
-			return false;//something wrong happens
+			
+			throw new DataAccessException(message);
 		}
-		return true;
+		int count=Integer.parseInt(message);
+		if (count==0){
+			//no item is deleted, even though the process is successful
+			throw new DataAccessException("The user did not follow symbol "+symbol+", no entries deleted");
+		}
+		return;
 	}
 }
