@@ -1,10 +1,10 @@
 package com.example.stockmonitor.query.util;
 import org.json.*;
 
+import com.example.stockmonitor.data.DateUtil;
 import com.example.stockmonitor.data.Stock;
 
 import java.util.*;
-import java.text.SimpleDateFormat;
 /**
   * @author: Tuan Dao
   * This class is used to parse a json string into a list of Stock objects using the org.json library
@@ -18,7 +18,7 @@ public class YahooJSonParser implements JsonParser{
 	public List<Stock> parseString(String input) throws JSONException{
 		JSONObject json=new JSONObject(input).getJSONObject("query");
 		String currentUTC=json.getString("created");
-		long epoch=convertUTCtoEpoch(currentUTC);
+		long epoch=DateUtil.convertUTCtoEpoch(currentUTC);
 		JSONArray results=json.getJSONObject("results").getJSONArray("quote");
 		List<Stock> list=new ArrayList<>();
 		Iterator<Object> iter=results.iterator();

@@ -1,4 +1,10 @@
 package com.example.stockmonitor.data;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 /**
  * Represent the stock information of a stock symbol
  * @author tuandao
@@ -33,6 +39,6 @@ public class Stock{
 	 * Debug function
 	 */
 	public String toString(){
-		return "[Symbol:"+symbol+", lastTradeTime:"+lastTradeTime+", queryTime:" + queryTime+", lastTradePrice:"+lastTradePrice+"]";
+		return "[Symbol:"+symbol+", lastTradeTime:"+lastTradeTime+", queryTime:" + DateUtil.epochToSimpleFormat(queryTime)+", lastTradePrice:"+lastTradePrice+"]";
 	}
 }

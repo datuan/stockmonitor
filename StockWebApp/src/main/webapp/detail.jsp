@@ -1,3 +1,4 @@
+<%@page import="java.text.SimpleDateFormat"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="com.example.stockmonitor.restclient.*" %>
@@ -27,7 +28,8 @@
 		userName="user1";
 		request.getSession().setAttribute("username", userName);
 	}
-	
+	//Date format
+	SimpleDateFormat dateFormat=new SimpleDateFormat("MM dd, yyyy hh:mm:ss");
 	RestApiClient client=new RestApiClient(restApiPath,userName,"");
 	String symbol=request.getParameter("symbol");
 	List<Stock> stocks=client.getSymbolHistory(symbol);
@@ -38,12 +40,15 @@
 %>
 <h3>Information about stock symbol <%=symbol%></h3>
 
+<table>
+<tr><td><div id="chart"/></td></tr>
+</table>
 <table border="1">
 <tr>
 	<td>Symbol</td>
 	<td>Price</td>
-	<td>Last Trade Time</td>
-	<td>Last Query Time</td>
+	<td>Last Trade Time<br/>(UTC)</td>
+	<td>Last Query Time<br/>(Local)</td>
 </tr>
 <%	//print out followed stocks and current prices
 		for (Stock s : stocks){
@@ -51,12 +56,12 @@
 			out.println("<td>"+s.symbol+"</td>");
 			out.println("<td>"+s.lastTradePrice+"</td>");
 			out.println("<td>"+s.lastTradeTime+"</td>");
-			out.println("<td>"+s.queryTime+"</td>");
+			out.println("<td>"+dateFormat.format(new Date(s.queryTime))+"</td>");
 			out.println("</tr>"); 
 		}
 %>
 </table>
-<div id="chart"/>
+
 <!-- javascript for chart -->
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script type="text/javascript">
@@ -66,35 +71,30 @@
   function drawBasic() {
 
         var data = new google.visualization.DataTable();
-        data.addColumn('timeofday', 'Time of Day');
-        data.addColumn('number', 'Motivation Level');
-
+        data.addColumn('datetime', 'Date');
+        data.addColumn('number', 'Price');
+		//Date be in format ('MM DD, yyyy hh:mm:ss'))
         data.addRows([
-          [{v: [8, 0, 0], f: '8 am'}, 1],
-          [{v: [9, 0, 0], f: '9 am'}, 2],
-          [{v: [10, 0, 0], f:'10 am'}, 3],
-          [{v: [11, 0, 0], f: '11 am'}, 4],
-          [{v: [12, 0, 0], f: '12 pm'}, 5],
-          [{v: [13, 0, 0], f: '1 pm'}, 6],
-          [{v: [14, 0, 0], f: '2 pm'}, 7],
-          [{v: [15, 0, 0], f: '3 pm'}, 8],
-          [{v: [16, 0, 0], f: '4 pm'}, 9],
-          [{v: [17, 0, 0], f: '5 pm'}, 10],
+          //[new Date("07 21, 2011 00:00:00"), 1],
+          //[new Date("07 21, 2011 07:20:00"), 2],
+<%
+		for (Stock s : stocks){
+			out.print("[new Date(\""+dateFormat.format(new Date(s.queryTime))+"\")," +s.lastTradePrice +"],\n"); 
+		}
+%>
         ]);
 
         var options = {
-          title: 'Motivation Level Throughout the Day',
+          title: 'History of Stock Prices',
           hAxis: {
-            title: 'Time of Day',
-            format: 'h:mm a',
-            viewWindow: {
-              min: [7, 30, 0],
-              max: [17, 30, 0]
-            }
+            title: 'Time',
           },
           vAxis: {
-            title: 'Rating (scale of 1-10)'
-          }
+            title: 'Stock Price'
+          },
+          'width':400,
+          'height':300,
+          legend: 'none'
         };
 
         var chart = new google.visualization.ColumnChart(

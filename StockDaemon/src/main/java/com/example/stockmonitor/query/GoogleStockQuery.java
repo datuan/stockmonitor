@@ -31,7 +31,7 @@ public class GoogleStockQuery implements StockQuery {
 		}
 		data.deleteCharAt(data.length()-1);
 		String url=query+data;
-		logger.debug("Query stock from Google using url: "+url);
+		logger.debug("Query stock from Google Finance");
 		HttpClient client=HttpClientBuilder.create().build();
 		HttpGet request=new HttpGet(url);
 		HttpResponse response = client.execute(request);

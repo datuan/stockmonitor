@@ -47,4 +47,34 @@
       <res-auth>Container</res-auth>
       <res-sharing-scope>Shareable</res-sharing-scope>
    </resource-ref>
+   <env-entry> 
+    	<env-entry-name>dbhost</env-entry-name>
+    	<env-entry-type>java.lang.String</env-entry-type>
+    	<!-- dbhost --><env-entry-value>localhost:3306</env-entry-value> 
+	</env-entry>
+	<env-entry> 
+    	<env-entry-name>dbname</env-entry-name>
+    	<env-entry-type>java.lang.String</env-entry-type>
+    	<!-- dbname --><env-entry-value>stock</env-entry-value> 
+	</env-entry>
+	<env-entry> 
+    	<env-entry-name>dbuser</env-entry-name>
+    	<env-entry-type>java.lang.String</env-entry-type>
+    	<!-- dbuser --><env-entry-value>root</env-entry-value> 
+	</env-entry>
+	<env-entry> 
+    	<env-entry-name>dbpassword</env-entry-name>
+    	<env-entry-type>java.lang.String</env-entry-type>
+    	<!-- dbpassword --><env-entry-value>tuandao</env-entry-value> 
+	</env-entry>
+	<env-entry> 
+    	<env-entry-name>dbdriver</env-entry-name>
+    	<env-entry-type>java.lang.String</env-entry-type>
+    	<!-- dbdriver --><env-entry-value>jdbc:mysql</env-entry-value> 
+	</env-entry>
+	<env-entry> 
+    	<env-entry-name>dbcls</env-entry-name>
+    	<env-entry-type>java.lang.String</env-entry-type>
+    	<!-- dbcls --><env-entry-value>com.mysql.jdbc.Driver</env-entry-value> 
+	</env-entry>
 </web-app>

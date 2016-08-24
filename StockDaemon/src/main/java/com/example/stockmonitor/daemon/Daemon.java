@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+
 import com.example.stockmonitor.data.Stock;
 import com.example.stockmonitor.dataaccess.DataAccess;
 import com.example.stockmonitor.dataaccess.DataAccessException;
 import com.example.stockmonitor.dataaccess.SQLDataAccess;
+import com.example.stockmonitor.dataaccess.util.Configuration;
 import com.example.stockmonitor.dataaccess.util.DBCPMySQLDataPool;
 import com.example.stockmonitor.dataaccess.util.SQLDataPool;
 import com.example.stockmonitor.query.GoogleStockQuery;
@@ -27,6 +29,12 @@ public class Daemon extends TimerTask {
 	private DataAccess da=new SQLDataAccess(pool);
 	
 	public static void main(String[] args){
+		if (args.length<1){
+			System.out.println("Error, no configuration find provided. Usage: <application> <config_file>");
+			System.exit(1);
+		}
+		Configuration.setConfiguration(args[0]);
+		DELAY=Configuration.INTERVAL;
 		timer=new Timer();
 		timer.schedule(new Daemon(), 0, DELAY);
 	}
@@ -52,7 +60,7 @@ public class Daemon extends TimerTask {
 				Stock stock=iter.next();
 				//TODO: enable again
 				da.addStockItem(stock);
-				logger.error("Stock: "+stock.toString()+" added to MySQL");
+				logger.info("Stock: "+stock.toString()+" added to MySQL");
 			}
 		}
 		catch(DataAccessException e){
